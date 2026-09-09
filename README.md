@@ -17,9 +17,29 @@ npm run check
 npm run sync
 ```
 
-## Deploy
+## Automatic execution
 
-Deploy this repository as a private Zeabur service using the included `Dockerfile`. Run it as a scheduled/cron job so the container runs `npm run sync` once per schedule and exits. Start with once daily; change to hourly only after a successful test.
+The included GitHub Actions workflow can run the synchronizer manually or every hour. In the repository, open **Settings → Secrets and variables → Actions** and add these repository secrets:
+
+```text
+TARGET_URL
+PORTAL_EMAIL
+PORTAL_PASSWORD
+GOOGLE_SHEET_ID
+GOOGLE_SERVICE_ACCOUNT_JSON
+```
+
+Only add the selector secrets when the defaults do not match the website:
+
+```text
+LOGIN_EMAIL_SELECTOR
+LOGIN_PASSWORD_SELECTOR
+LOGIN_SUBMIT_SELECTOR
+EXPORT_BUTTON_TEXT
+SHEET_TAB
+```
+
+Open **Actions → Sync leader DNA data → Run workflow** for the first test. Once the test succeeds, the workflow will run hourly. The included `Dockerfile` can also be used to deploy the same one-shot worker to Zeabur as a scheduled job.
 
 Never log or commit the dashboard password, service-account JSON, student phone numbers, or downloaded CSV.
 
