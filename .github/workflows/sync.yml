@@ -1,0 +1,48 @@
+name: Sync leader DNA data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: leader-dna-sheet-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright@1.63.0 install --with-deps chromium
+
+      - name: Run synchronizer
+        env:
+          TARGET_URL: ${{ secrets.TARGET_URL }}
+          PORTAL_EMAIL: ${{ secrets.PORTAL_EMAIL }}
+          PORTAL_PASSWORD: ${{ secrets.PORTAL_PASSWORD }}
+          LOGIN_EMAIL_SELECTOR: ${{ secrets.LOGIN_EMAIL_SELECTOR }}
+          LOGIN_PASSWORD_SELECTOR: ${{ secrets.LOGIN_PASSWORD_SELECTOR }}
+          LOGIN_SUBMIT_SELECTOR: ${{ secrets.LOGIN_SUBMIT_SELECTOR }}
+          EXPORT_BUTTON_TEXT: ${{ secrets.EXPORT_BUTTON_TEXT }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          SHEET_TAB: ${{ secrets.SHEET_TAB }}
+        run: npm run sync
+
